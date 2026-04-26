@@ -479,10 +479,6 @@ function renderMain() {
     '📋 Gợi ý công thức phối hợp + ⚠️ Đánh giá tương tác →'
   )
 ),
-      div({style:{marginTop:'12px',padding:'12px 14px',background:'var(--teal)',color:'white',borderRadius:'10px'}},
-        div({style:{fontSize:'13px',fontWeight:800,marginBottom:'4px'}},'⚕️ CÔNG CỤ THAM KHẢO — KHÔNG THAY THẾ ĐÁNH GIÁ LÂM SÀNG'),
-        div({style:{fontSize:'12px',opacity:.85,lineHeight:'1.6'}},'Dành riêng DS/CBYT. Xác minh OTC/ETC tại dichvucong.dav.gov.vn. Nguồn: '+DATA_META.refs[0]+' | Data v'+DATA_META.version),
-      ),
     );
   }
 
@@ -522,8 +518,6 @@ function renderMain() {
       ),
       disease?btn({style:{background:'rgba(255,255,255,.2)',borderRadius:'5px',padding:'3px 7px',color:'white',fontSize:'10px',fontWeight:700,cursor:'pointer',flexShrink:0},onclick:()=>{S.page='dosing';render();}},'📋'):null,
       disease?btn({style:{background:'linear-gradient(135deg,#fbbf24,#f59e0b)',borderRadius:'5px',padding:'3px 7px',color:'#1a2e2a',fontSize:'10px',fontWeight:800,cursor:'pointer',flexShrink:0},onclick:()=>{S.quizOpen=true;S.quizData=null;render();}},'🎮'):null,
-      btn({style:{background:'rgba(255,255,255,.1)',borderRadius:'5px',padding:'3px 7px',color:'rgba(255,255,255,.8)',fontSize:'11px',cursor:'pointer',flexShrink:0},onclick:()=>{S.showDisclaimer=true;render();}},'⚖️'),
-      btn({style:{background:'rgba(255,255,255,.15)',borderRadius:'5px',padding:'3px 7px',color:'rgba(255,255,255,.9)',fontSize:'10px',cursor:'pointer',flexShrink:0},onclick:()=>{if(window._supa)window._supa.auth.signOut().then(()=>window.location.href='index.html');}},'↩'),
     );
     const mobC=S.mobileTab==='nav'?col1:S.mobileTab==='sym'?col2:col3;
     return div({style:{height:'100%',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--cream)',position:'relative'}},
