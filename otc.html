@@ -1,0 +1,1049 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>			
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<link rel="icon" type="image/png" href="icon.png">
+<title>OTC Review Tool v13 — Data v2.0</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}
+:root{--teal:#1E4A40;--teal2:#2D6B5C;--cream:#F5EFE0;--cream2:#EDE8D4;--cream3:#CFC9B5;--t:#1A2E2A;--t2:#3D5550;--t3:#6B8882}
+html{height:100%;overflow:hidden}
+body{height:100%;overflow:hidden;position:fixed;width:100%;background:var(--cream);font-family:"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;font-size:16px}
+button{font-family:inherit;cursor:pointer;border:none;background:none;font-size:inherit}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--cream2)}
+::-webkit-scrollbar-thumb{background:var(--teal2);border-radius:10px}
+.pharm-panel{position:absolute;bottom:20px;right:20px;width:360px;max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:white;border:2px solid var(--teal);border-radius:14px;padding:16px;box-shadow:0 8px 40px rgba(30,74,64,.3);z-index:9999}@media(max-width:768px){.pharm-panel{bottom:0!important;right:0!important;left:0!important;width:100%!important;max-width:100%!important;border-radius:18px 18px 0 0!important;max-height:72vh!important;padding:18px 16px!important}.otc-user-bar{display:none!important}.otc-social-btns{flex-direction:column!important;bottom:calc(62px + env(safe-area-inset-bottom,0px))!important;right:10px!important;gap:8px!important;}.otc-social-btn{width:32px!important;height:32px!important;}.otc-social-btn svg,.otc-social-btn span{transform:scale(0.7);}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:8000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:white;border-radius:18px;padding:28px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 12px 48px rgba(0,0,0,.25)}
+#app{height:100%}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+.otc-user-bar{position:fixed;bottom:0;left:0;right:0;z-index:9990;background:rgba(30,74,64,.95);backdrop-filter:blur(6px);padding:6px 16px;display:none;align-items:center;justify-content:space-between;font-size:12px;color:var(--cream2)}
+.otc-user-bar .otc-name{opacity:.7;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.otc-logout{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:4px 12px;font-size:11px;color:var(--cream);cursor:pointer;font-family:inherit;transition:all .2s;flex-shrink:0}
+.otc-logout:hover{background:rgba(255,255,255,.22)}
+.otc-social-btns{position:fixed;bottom:52px;right:12px;z-index:9989;display:flex;flex-direction:column;gap:8px}
+.otc-social-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.otc-social-btn:hover{transform:scale(1.1);box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.otc-social-btn.fb{background:#1877F2}
+.otc-social-btn.tt{background:#010101}
+/* Donation */
+.otc-coffee-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--cream);cursor:pointer;font-family:inherit;transition:all .2s;flex-shrink:0;margin-right:4px}
+.otc-coffee-btn:hover{background:rgba(212,168,67,.3);border-color:rgba(212,168,67,.5)}
+.donate-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px;animation:donFadeIn .3s}
+@keyframes donFadeIn{from{opacity:0}to{opacity:1}}
+.donate-modal{background:var(--white,#fff);border-radius:18px;max-width:380px;width:100%;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 12px 48px rgba(0,0,0,.3);animation:donSlide .4s ease-out}
+@keyframes donSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.donate-header{background:#1E4A40;padding:20px;text-align:center;border-radius:18px 18px 0 0;position:relative}
+.donate-header h3{color:#F5EFE0;font-size:17px;font-weight:700;margin:0}
+.donate-header p{color:#CFC9B5;font-size:12px;margin:4px 0 0}
+.donate-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#CFC9B5;font-size:20px;cursor:pointer;padding:4px;line-height:1}
+.donate-body{padding:20px;text-align:center}
+.donate-body .db-desc{color:#3D5550;font-size:13px;line-height:1.7;margin-bottom:16px;text-align:left}
+.donate-body .db-amounts{display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+.donate-body .db-amt{padding:8px 16px;border-radius:8px;border:1.5px solid #EDE8D4;background:#F5EFE0;color:#1A2E2A;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.donate-body .db-amt:hover,.donate-body .db-amt.active{border-color:#1E4A40;background:#1E4A40;color:#F5EFE0}
+.donate-body .db-qr{margin:12px auto;max-width:220px}
+.donate-body .db-qr img{width:100%;border-radius:12px;border:2px solid #EDE8D4}
+.donate-body .db-bank{color:#6B8882;font-size:11px;line-height:1.6;margin-top:10px}
+.donate-body .db-bank strong{color:#1A2E2A}
+.donate-body .db-thanks{color:#2D6B5C;font-size:12px;font-style:italic;margin-top:14px}
+.auth-check-overlay{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:"Segoe UI",system-ui,sans-serif;color:var(--t3);font-size:14px;flex-direction:column;gap:12px}
+.auth-check-spinner{width:32px;height:32px;border:3px solid var(--cream2);border-top-color:var(--teal);border-radius:50%;animation:authspin .7s linear infinite}
+@keyframes authspin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="auth-check-overlay" id="authCheckOverlay">
+  <div class="auth-check-spinner"></div>
+  <span>Đang khởi động...</span>
+</div>
+
+<script data-cfasync="false" src="data_pharm.js"></script>
+<script data-cfasync="false" src="quiz_bank.js"></script>
+<script data-cfasync="false" src="drug_safety.js"></script>
+
+<script>
+function otcLogUsage(action,detail){
+  if(!window._supa||!window._supaUserId)return;
+  window._supa.from('usage_logs').insert({user_id:window._supaUserId,action:action,detail:detail||{}}).select().then(function(r){
+    if(r.error)console.warn('otcLog:',r.error.message);
+  });
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var app=document.getElementById('app');if(!app)return;
+  app.addEventListener('click',function(e){
+    var d=e.target.closest('[data-disease]');
+    if(d){otcLogUsage('select_disease',{disease:d.dataset.disease});return;}
+    var t=e.target.closest('[data-tab-id]');
+    if(t){otcLogUsage('view_tab',{tab:t.dataset.tabId});}
+  });
+});
+</script>
+<div id="app"></div>
+<script>
+const LOGO_URL = 'icon.png';
+
+// ── STATE ─────────────────────────────────────────────────────────────
+const S = {
+  page: 'main',
+  disease: null,
+  symptoms: [],
+  group: 'adult',
+  pharmOpen: null,
+  showDisclaimer: false,
+  mobileTab: 'nav',
+  quizOpen: false,
+  quizData: null,
+  quizIdx: 0,
+  quizAnswers: [],
+  quizDone: false,
+  quizReview: false
+};
+const isMob=()=>window.innerWidth<=768;
+
+// ── GROUPS (no iMAO, added suygan/suythan) ────────────────────────────
+const GROUPS = [
+  {id:'adult',label:'Người lớn',icon:'👤',k:null},
+  {id:'u2y',label:'Trẻ <2 tuổi',icon:'👶',k:'u2y'},
+  {id:'cu6',label:'Trẻ 2–6t',icon:'🧒',k:'cu6'},
+  {id:'c612',label:'Trẻ 6–12t',icon:'🎒',k:'c612'},
+  {id:'preg',label:'Thai phụ',icon:'🤰',k:'preg'},
+  {id:'bf',label:'Cho bú',icon:'🤱',k:'bfeed'},
+  {id:'eld',label:'Cao tuổi (>60)',icon:'👴',k:'eld'},
+  {id:'htn',label:'THA/Tim',icon:'❤️‍🩹',k:'htn'},
+  {id:'dm',label:'ĐTĐ',icon:'💉',k:'dm'},
+  {id:'suygan',label:'Suy gan',icon:'🟡',k:'suygan'},
+  {id:'suythan',label:'Suy thận',icon:'💧',k:'suythan'},
+];
+
+// ── SYM FILTER MAP ────────────────────────────────────────────────────
+// Maps disease.id → array of symIdxs for each B group
+const SYM_FILTER = {
+  cold:[[2,3,5],[0],[0],[1],[4]],
+  cough:[[0,2,3],[0,2,3],[1],[1],[1],[2]],
+  throat:[[0,1,2,3,4],[0,1],[0,1,2,3]],
+  rhinitis:[[0,1,2,3,5],[0,1,2,3,4,5],[0,1,2,5],[3]],
+  sinusitis:[[0,1,3],[1,2],[0,4],[0,1,5]],
+  indigestion:[[3],[0,2],[1]],
+  diarrhea:[[],[0],[0,2],[1]],
+  constipation:[[0],[0],[1]],
+  gerd:[[],[],[],[2,3]],
+  gastritis:[[0,1,2,3,4,5],[0,1,2],[0,1],[3]],
+  nausea:[[0,3,4],[0,1],[2,5],[3],[4,5]],
+  hemorrhoids:[[0,1,2,3,4,5],[0,1,2],[3,4,5]],
+  headache:[[0,1,2,3,4,5],[3],[1,5]],
+  muscle:[[0,1,2,3,4,5],[5]],
+  skinallergy:[[0,1,2,4],[3,4],[1,2,5]],
+  mouthulcer:[[0,1,2,3],[3,4,5],[1,2]],
+  minorwound:[[0,1],[2,3],[4,5]],
+  vertigo:[[0,1,2,5],[3,4],[0,2,5]],
+  funginf:[[0],[1,2],[3],[0,1,2,3]],
+  conjunctivitis:[[0,3,4],[1],[2],[0,3,4]],
+  insomnia:[[0,2,3],[1],[3],[4],[1,2,3,4]],
+  dysmenorrhea:[[0,1,2],[0,1,3],[2,3],[4]],
+  dentalpain:[[0,4],[1,2,3],[3,4],[2,3],[5]],
+  dryeye:[[0,1,2],[2,3],[3,4],[5],[0,4]],
+  vaginalcandidiasis:[[0,1,2],[3,4],[0,2,4],[5]],
+  diaperash:[[0,1],[2,3],[4,5],[0,1,5]],
+  herpeslabialis:[[0],[1,2,3],[1,2,3,4],[4,5],[0,5]],
+  sebdermatitis:[[0,1,2],[0,1,3],[4,5],[2,3],[0,1]],
+  acne:[[0],[1],[2],[3,4],[5]],
+  scabies:[[0,1,2],[3,4],[5],[0,1,3],[2,4]],
+  eczema:[[0,1,2],[1,3],[3,4],[0,2,4],[1,5]],
+  backpain:[[0,1,2],[3,4],[5],[1,2,3],[0,4]],
+  arthritis:[[0,1,2],[1,2,3],[3,4],[0,4],[5]],
+  gout:[[0,1,2],[0,1,2,3],[4,5],[3,5]]
+};
+
+// ── HELPERS ──────────────────────────────────────────────────────────
+function h(tag, attrs, ...children) {
+  const el = document.createElement(tag);
+  if (attrs) Object.entries(attrs).forEach(([k, v]) => {
+    if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'cls') el.className = v;
+    else el.setAttribute(k, v);
+  });
+  children.flat(Infinity).forEach(c => {
+    if (c == null) return;
+    el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return el;
+}
+function div(a, ...ch) { return h('div', a, ...ch); }
+function btn(a, ...ch) { return h('button', a, ...ch); }
+function span(a, ...ch) { return h('span', a, ...ch); }
+
+function getDisease() { return DISEASES.find(d => d.id === S.disease); }
+function getGroup() { return GROUPS.find(g => g.id === S.group); }
+
+function getGroupSafety(drugName, group) {
+  if (!group || group === 'adult') return {show:true,warn:null,dose:null};
+  const map = DRUG_SAFETY[drugName];
+  if (!map) return {show:true,warn:null,dose:null};
+  const gs = map[group];
+  if (!gs) return {show:true,warn:null,dose:null};
+  return {show:gs.show !== false, warn:gs.warn||null, dose:gs.dose||null};
+}
+
+function isETC(n) { return n.startsWith('⚠️') || n.includes('ETC ❌'); }
+
+function getFilteredB(disease) {
+  if (!disease || !disease.B) return [];
+  // Step 1: filter by selected patient group (grp_show)
+  let B = disease.B;
+  if (S.group && S.group !== 'adult') {
+    B = disease.B.filter(g => !g.grp_show || g.grp_show.includes(S.group));
+  }
+  if (S.symptoms.length === 0) return B;
+  // Step 2: filter by symptom (using original B index for SYM_FILTER alignment)
+  const filters = SYM_FILTER[disease.id];
+  if (!filters) return B;
+  return B.filter(g => {
+    const origIdx = disease.B.indexOf(g);
+    const idxs = filters[origIdx];
+    if (!idxs || idxs.length === 0) return true;
+    return idxs.some(x => S.symptoms.includes(x));
+  });
+}
+
+// ── DRUG CARD ─────────────────────────────────────────────────────────
+function drugCard(drug, C) {
+  const isEtc = isETC(drug.n);
+  const safety = getGroupSafety(drug.n.replace(/^⚠️\s*/,''), S.group);
+  const childOnlyGroups = ['u3m','u2y'];
+  if (!safety.show && (childOnlyGroups.includes(S.group) || S.group === 'preg')) return null;
+  const isEtcWarn = !!(safety.warn && safety.warn.includes('ETC'));
+  const isRed = isEtc || !safety.show || isEtcWarn;
+  const bg = isRed ? '#fff1f2' : (safety.warn ? '#fffbeb' : '#f0fef4');
+  const bl = isRed ? '#f87171' : (safety.warn ? '#fbbf24' : '#4ade80');
+  const displayName = drug.n.replace(/^⚠️\s*/,'');
+  const hasPharm = !!PHARM[displayName];
+  const displayDose = safety.dose || drug.d;
+
+  const nameEl = span({
+    style:{fontSize:'15px',fontWeight:700,color:'var(--t)',cursor:hasPharm?'pointer':'default',textDecoration:hasPharm?'underline dotted':'none',textUnderlineOffset:'3px'},'data-drug':displayName,
+  }, displayName);
+  if (hasPharm) {
+    nameEl.addEventListener('click', e => {
+      e.stopPropagation();
+      S.pharmOpen = S.pharmOpen === displayName ? null : displayName;
+     document.querySelectorAll('.pb,.pharm-panel,.overlay,.quiz-modal-overlay,[data-quiz-modal]').forEach(e=>e.remove());
+     if(S.pharmOpen){const tt=renderPharmTooltip(S.pharmOpen);;if(tt)document.body.appendChild(tt);}
+    });
+  }
+
+  return div({style:{background:bg,borderLeft:`3px solid ${bl}`,borderRadius:'10px',padding:'10px 12px',marginBottom:'8px'}},
+    div({style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px'}},
+      isEtc
+        ? span({style:{fontSize:'11px',fontWeight:800,background:'#fee2e2',color:'#b91c1c',padding:'2px 6px',borderRadius:'4px',flexShrink:0}}, 'ETC ❌')
+        : span({style:{fontSize:'11px',fontWeight:800,background:'#dcfce7',color:'#15803d',padding:'2px 6px',borderRadius:'4px',flexShrink:0}}, 'OTC ✅'),
+      nameEl,
+      hasPharm ? span({style:{fontSize:'11px',color:'var(--t3)'}}, ' ℹ️') : null,
+    ),
+    isEtc
+      ? div({style:{fontSize:'13px',color:'#b91c1c',marginBottom:'3px'}}, 'ETC ❌ cần kê đơn BS')
+      : (displayDose ? div({style:{fontSize:'14px',fontWeight:600,color:C,fontFamily:'monospace',marginBottom:'4px'}}, '📋 '+displayDose) : null),
+    (!isEtc && drug.note) ? div({style:{fontSize:'13px',color:'var(--t2)',lineHeight:'1.5'}}, drug.note) : null,
+    (!safety.show && !isEtc && S.group !== 'adult') ? div({style:{fontSize:'12px',color:'#b91c1c',background:'#fee2e2',padding:'4px 8px',borderRadius:'5px',marginTop:'4px'}}, '🚫 Chống chỉ định: '+(safety.warn||'Không phù hợp nhóm này')) : null,
+    (safety.show && safety.warn && !isEtc) ? div({style:{fontSize:'12px',color:isEtcWarn?'#b91c1c':'#92400e',background:isEtcWarn?'#fee2e2':'#fef3c7',padding:'4px 8px',borderRadius:'5px',marginTop:'4px'}}, (isEtcWarn?'🚫 ':'⚠️ ')+safety.warn) : null,
+  );
+}
+
+// ── PHARM TOOLTIP ─────────────────────────────────────────────────────
+function renderPharmTooltip(drugName) {
+  const info = PHARM[drugName]; if (!info) return null;
+  return div({cls:'pharm-panel', onclick:e=>e.stopPropagation()},
+    div({style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'10px'}},
+      div({},
+        div({style:{fontSize:'15px',fontWeight:800,color:'var(--teal)',marginBottom:'2px'}}, drugName),
+        div({style:{fontSize:'11px',color:'var(--t3)',fontStyle:'italic'}}, info.cls),
+      ),
+      btn({style:{background:'#f1f5f9',borderRadius:'6px',padding:'5px 10px',fontSize:'13px',fontWeight:700,color:'var(--t2)',cursor:'pointer'},onclick:()=>{S.pharmOpen=null;document.querySelectorAll('.pb,.pharm-panel,.overlay,.quiz-modal-overlay,[data-quiz-modal]').forEach(e=>e.remove());}}, 'Đóng ×'),
+    ),
+    div({style:{fontSize:'13px',color:'var(--t2)',lineHeight:'1.6',marginBottom:'6px'}}, span({style:{fontWeight:700}}, 'Cơ chế: '), info.mech),
+    div({style:{fontSize:'12px',color:'var(--t2)',lineHeight:'1.5',marginBottom:'4px'}}, span({style:{fontWeight:700}}, 'PK: '), info.pk),
+    info.ci ? div({style:{fontSize:'12px',color:'#b91c1c',lineHeight:'1.5',marginBottom:'4px'}}, span({style:{fontWeight:700}}, 'CCĐ: '), info.ci) : null,
+    div({style:{fontSize:'12px',lineHeight:'1.5',marginBottom:'4px',color:info.warn.startsWith('⚠️')||info.warn.startsWith('🚨')?'#92400e':'#166534'}}, info.warn),
+    info.dmax ? div({style:{fontSize:'12px',color:'var(--t3)'}}, span({style:{fontWeight:700}}, 'Liều tối đa: '), info.dmax) : null,
+    div({style:{fontSize:'11px',color:'var(--t3)',borderTop:'1px solid #f1f5f9',paddingTop:'6px',marginTop:'8px'}}, 'Nguồn: Dược thư QGVN · Blenkinsopp 2025'),
+  );
+}
+
+function renderDosing() {
+  const disease=getDisease();
+  if(!disease){S.page='main';render();return div({});}
+  const C=disease.color;
+  function checkInters(drugs){
+    const dl=drugs.map(d=>d.toLowerCase());
+    const res=[];
+    const pairs=[['phenylephrine','maoi'],['dextromethorphan','maoi'],['cimetidine','omeprazole'],['lactulose','antacid'],['diosmectite','other']];
+    pairs.forEach(([a,b])=>{if(dl.some(d=>d.includes(a))&&dl.some(d=>d.includes(b))){const k=a+'|'+b;if(INTERS[k])res.push(INTERS[k]);}});
+    if(dl.some(d=>d.includes('diosmectite')))res.push(INTERS['diosmectite|other']);
+    return res;
+  }
+  const cards=disease.dosing.map((combo,i)=>{
+    const ints=checkInters(combo.drugs);
+    const hasSev=ints.some(x=>x.sev==='NGHIÊM TRỌNG'||x.sev==='Không nên phối hợp');
+    return div({style:{background:'white',borderRadius:'14px',overflow:'hidden',boxShadow:'0 2px 8px rgba(30,74,64,.1)',border:`1px solid ${C}20`}},
+      div({style:{background:`linear-gradient(135deg,${C},${C}CC)`,padding:'10px 14px',display:'flex',alignItems:'center',gap:'8px'}},
+        div({style:{width:'22px',height:'22px',borderRadius:'50%',background:'rgba(255,255,255,.3)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:900,color:'white',flexShrink:0}},String(i+1)),
+        div({style:{fontSize:'13px',fontWeight:800,color:'white',flex:1}},combo.name),
+        hasSev?span({style:{fontSize:'9px',background:'#ef4444',color:'white',padding:'1px 5px',borderRadius:'8px',fontWeight:800}},'⚠️ TT'):null,
+      ),
+      div({style:{padding:'12px 14px'}},
+        div({style:{marginBottom:'8px'}},...combo.drugs.map((d,j)=>div({style:{display:'flex',gap:'6px',padding:'3px 0',borderBottom:j<combo.drugs.length-1?'1px solid var(--cream2)':'none'}},span({style:{fontSize:'10px',fontWeight:800,color:C,flexShrink:0,marginTop:'2px'}},(j+1)+'.'),span({style:{fontSize:'13px',color:'var(--t)',lineHeight:'1.5'}},d)))),
+        div({style:{fontSize:'12px',color:'var(--t2)',background:'var(--cream)',padding:'6px 10px',borderRadius:'6px',marginBottom:'7px',lineHeight:'1.5'}},combo.note),
+        ints.length>0
+          ?div({style:{background:hasSev?'#fff1f2':'#fffbeb',border:`1px solid ${hasSev?'#fecdd3':'#fde68a'}`,borderRadius:'7px',padding:'7px 10px'}},
+              div({style:{fontSize:'11px',fontWeight:800,color:hasSev?'#be123c':'#92400e',marginBottom:'3px'}},'Tương tác thuốc:'),
+              ...ints.map(it=>div({style:{fontSize:'10px',color:hasSev?'#7f1d1d':'#78350f',marginBottom:'2px'}},span({style:{fontWeight:700}},'['+it.sev+'] '),it.desc)))
+          :div({style:{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:'7px',padding:'5px 8px',fontSize:'10px',color:'#166534',fontWeight:700}},'✅ Không có tương tác đáng kể'),
+      ),
+    );
+  });
+  return div({style:{height:'100vh',display:'flex',flexDirection:'column',overflow:'hidden'}},
+    div({style:{background:'var(--teal)',color:'white',padding:'9px 16px',display:'flex',alignItems:'center',gap:'10px',flexShrink:0}},
+      h('img',{src:LOGO_URL,style:{width:'28px',height:'28px',borderRadius:'50%',objectFit:'cover',background:'var(--teal)'}}),
+      div({style:{fontSize:'13px',fontWeight:800}}, 'Gợi ý công thức · '+disease.icon+' '+disease.name),
+      btn({style:{marginLeft:'auto',background:'rgba(255,255,255,.2)',borderRadius:'7px',padding:'5px 10px',color:'white',fontSize:'12px',fontWeight:700,cursor:'pointer'},onclick:()=>{S.page='main';render();}},'← Quay lại'),
+    ),
+    div({style:{flex:1,overflowY:'auto',WebkitOverflowScrolling:'touch',padding:'14px 16px',background:'var(--cream)'}},
+      div({style:{maxWidth:'1100px',margin:'0 auto'}},
+        div({style:{fontSize:'12px',color:'var(--t2)',marginBottom:'14px',padding:'8px 12px',background:'var(--cream2)',borderRadius:'8px'}},
+          'Các gợi ý công thức cắt liều · Nguồn: '+DATA_META.refs[0]+' · Data v'+DATA_META.version+' · '+DATA_META.updated),
+        div({style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(330px,1fr))',gap:'12px'}},...cards),
+      ),
+    ),
+  );
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────────────
+function renderMain() {
+  const disease=getDisease();
+  const group=getGroup();
+  const C=disease?disease.color:'var(--teal)';
+  const gNote=group&&group.k&&disease?disease.special[group.k]:null;
+  const isChildSafe=['u3m','u2y'].includes(S.group);
+  const isGwRed=['u3m','u2y','cu6','c612'].includes(S.group);
+  const batches=[{bk:'respiratory',label:'🫁 Hô hấp'},{bk:'digestive',label:'🧍 Tiêu hóa'},{bk:'skin',label:'🧴 Da liễu'},{bk:'eye',label:'👁️ Mắt'},{bk:'allergy',label:'🌼 Dị ứng'},{bk:'neuro',label:'🧠 Thần kinh'},{bk:'musculo',label:'🦴 Cơ xương khớp'},{bk:'gynecology',label:'👩 Phụ khoa'},{bk:'dental',label:'🦷 Răng miệng'}];
+
+  // Col1: Nav
+  const col1=div({style:{width:'190px',flexShrink:0,background:'var(--teal)',overflowY:'auto',WebkitOverflowScrolling:'touch',padding:'8px 6px'},'data-col1-scroll':''},
+    ...batches.map(({bk,label})=>{
+      const bd=DISEASES.filter(d=>d.batch===bk||d.batch2===bk); if(!bd.length)return null;
+      return div({},
+        div({style:{fontSize:'10px',fontWeight:800,color:'rgba(255,255,255,.45)',letterSpacing:'1.5px',textTransform:'uppercase',padding:'8px 8px 4px'}},label),
+        ...bd.map(d=>btn({style:{width:'100%',display:'flex',alignItems:'center',gap:'8px',padding:'8px 8px',borderRadius:'9px',textAlign:'left',marginBottom:'3px',background:S.disease===d.id?'rgba(255,255,255,.2)':'rgba(255,255,255,.05)',borderLeft:S.disease===d.id?'3px solid white':'3px solid transparent'},onclick:()=>{S.disease=d.id;S.symptoms=[];S.group='adult';if(isMob())S.mobileTab='sym';render();}},
+          span({style:{fontSize:'18px',flexShrink:0}},d.icon),
+          div({},div({style:{fontSize:'12px',fontWeight:S.disease===d.id?800:500,color:'white'}},d.name),div({style:{fontSize:'10px',color:'rgba(255,255,255,.45)'}},d.sub)),
+        )),
+      );
+    }),
+    div({style:{marginTop:'8px',padding:'6px 8px',borderTop:'1px solid rgba(255,255,255,.1)'}},div({style:{fontSize:'10px',color:'rgba(255,255,255,.4)',lineHeight:'1.5'}},'Data v'+DATA_META.version+'\nupdate '+DATA_META.updated)),
+  );
+
+  // Col2: Symptoms + Groups
+  const col2=div({style:{width:'210px',flexShrink:0,overflowY:'auto',WebkitOverflowScrolling:'touch',borderRight:'1px solid var(--cream3)',background:'rgba(255,255,255,.8)',padding:'10px 8px'}},
+    !disease
+      ?div({style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'8px',opacity:.4}},div({style:{fontSize:'28px'}},'👈'),div({style:{fontSize:'13px',color:'var(--t2)',textAlign:'center'}},'Chọn nhóm bệnh'))
+      :div({},
+        div({style:{fontSize:'13px',fontWeight:800,color:'var(--teal)',marginBottom:'8px',display:'flex',gap:'6px',alignItems:'center'}},span({style:{fontSize:'16px'}},disease.icon),disease.name),
+        div({style:{fontSize:'10px',fontWeight:700,color:'var(--t3)',letterSpacing:'.8px',marginBottom:'5px',textTransform:'uppercase'}},'Triệu chứng:'),
+        ...disease.symptoms.map((sym,i)=>{
+          const sel=S.symptoms.includes(i);
+          return btn({style:{width:'100%',display:'flex',gap:'7px',padding:'6px 7px',borderRadius:'7px',border:`1.5px solid ${sel?C:'var(--cream3)'}`,background:sel?C+'12':'transparent',marginBottom:'4px',textAlign:'left'},onclick:()=>{S.symptoms=sel?S.symptoms.filter(x=>x!==i):[...S.symptoms,i];render();}},
+            div({style:{width:'14px',height:'14px',borderRadius:'3px',border:`2px solid ${sel?C:'var(--cream3)'}`,background:sel?C:'white',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:'1px'}},sel?span({style:{color:'white',fontSize:'9px',fontWeight:900}},'✓'):null),
+            span({style:{fontSize:'12px',fontWeight:sel?700:400,color:sel?'var(--t)':'var(--t2)'}},sym),
+          );
+        }),
+        div({style:{fontSize:'10px',fontWeight:700,color:'var(--t3)',letterSpacing:'.8px',margin:'10px 0 5px',textTransform:'uppercase'}},'Nhóm bệnh nhân:'),
+        div({style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'4px'}},
+          ...(()=>{
+            const ng=disease&&disease.noGroups?disease.noGroups:[];
+            if(ng.includes(S.group)){S.group='adult';}
+            return (disease?GROUPS.filter(g=>!ng.includes(g.id)):GROUPS);
+          })().map(g=>{
+            const sel=S.group===g.id;
+            return btn({style:{padding:'5px 3px',borderRadius:'7px',border:`1.5px solid ${sel?C:'var(--cream3)'}`,background:sel?C+'12':'transparent'},onclick:()=>{S.group=g.id;render();}},
+              div({style:{fontSize:'15px'}},g.icon),
+              div({style:{fontSize:'9px',fontWeight:sel?700:400,color:sel?'var(--t)':'var(--t2)',lineHeight:'1.2'}},g.label),
+            );
+          })
+        ),
+      )
+  );
+
+  // Col3: Main Content
+  let col3Inner;
+  if(!disease){
+    col3Inner=div({style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'14px',padding:'40px'}},
+      h('img',{src:LOGO_URL,style:{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',opacity:.2,background:'var(--teal)'}}),
+      div({style:{fontSize:'16px',color:'var(--t3)',textAlign:'center'}},'Chọn nhóm bệnh để xem gợi ý'),
+      div({style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(110px,1fr))',gap:'8px',maxWidth:'650px',width:'100%'}},
+        ...DISEASES.map(d=>btn({style:{padding:'12px 8px',borderRadius:'10px',background:'white',border:'1px solid var(--cream3)',textAlign:'center',cursor:'pointer'},onclick:()=>{S.disease=d.id;S.symptoms=[];S.group='adult';if(isMob())S.mobileTab='sym';render();}},
+          div({style:{fontSize:'22px',marginBottom:'4px'}},d.icon),
+          div({style:{fontSize:'12px',fontWeight:600,color:'var(--t)',lineHeight:'1.3'}},d.name),
+        ))
+      ),
+    );
+  } else {
+    // Group warning
+    const gwEl = gNote?div({style:{background:isGwRed?'#fff1f2':'#fffbeb',border:`1px solid ${isGwRed?'#fca5a5':'#fde68a'}`,borderRadius:'10px',padding:'12px 14px',marginBottom:'12px'}},
+      div({style:{fontSize:'15px',fontWeight:800,color:isGwRed?'#b91c1c':'#92400e',marginBottom:'4px'}},(isGwRed?'🚨 ':'⚠️ ')+group.label),
+      div({style:{fontSize:'14px',color:isGwRed?'#7f1d1d':'#78350f',lineHeight:'1.7',whiteSpace:'pre-wrap'}},gNote),
+    ):null;
+
+    // Red flags — always visible
+    const rfEl=disease.redFlags.length>0?div({style:{background:'white',borderRadius:'12px',padding:'12px 14px',border:'1px solid var(--cream3)',marginBottom:'14px',boxShadow:'0 1px 4px rgba(0,0,0,.06)'}},
+      div({style:{fontSize:'14px',fontWeight:800,color:'var(--t)',marginBottom:'8px'}},'🚦 Red Flags — Dấu hiệu chuyển ngay'),
+      div({style:{display:'flex',gap:'6px',flexWrap:'wrap'}},
+        ...disease.redFlags.map(rf=>{
+          const ic=rf.u==='crit',ih=rf.u==='high';
+          const bg=ic?'#fee2e2':ih?'#fef3c7':'#dbeafe';
+          const bc=ic?'#fca5a5':ih?'#fde68a':'#bfdbfe';
+          const tc=ic?'#b91c1c':ih?'#92400e':'#1d4ed8';
+          return div({style:{background:bg,border:`1px solid ${bc}`,borderRadius:'7px',padding:'6px 10px',flex:'1',minWidth:'190px'}},
+            div({style:{fontSize:'13px',fontWeight:700,color:tc,marginBottom:'2px'}},(ic?'🚨 ':ih?'⚠️ ':'📅 ')+rf.f),
+            rf.a?div({style:{fontSize:'12px',color:tc,opacity:.85}},rf.a):null,
+          );
+        })
+      ),
+    ):null;
+
+    // A section
+    const secA=div({style:{flex:'1 1 240px',minWidth:'220px',paddingRight:'8px'}},
+      div({style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'10px',paddingBottom:'6px',borderBottom:`2px solid ${C}`}},
+        div({style:{width:'20px',height:'20px',borderRadius:'5px',background:C,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:900,color:'white'}},'A'),
+        div({style:{fontSize:'14px',fontWeight:800,color:'var(--t)'}},'🎯 Căn nguyên'),
+      ),
+      disease.A.etc&&disease.A.etc.length>0?div({style:{background:'#fef3c7',border:'1px solid #fde68a',borderRadius:'8px',padding:'10px 12px',marginBottom:'10px'}},
+        div({style:{fontSize:'12px',fontWeight:800,color:'#92400e',marginBottom:'6px'}},'⚠️ Điều trị căn nguyên — ETC'),
+        ...disease.A.etc.map(e=>div({style:{padding:'4px 0',borderTop:'1px solid #fde68a'}},
+          div({style:{display:'flex',alignItems:'center',gap:'6px'}},span({style:{fontSize:'13px',fontWeight:700,color:'#7c2d12'}},e.d),span({style:{background:'#ef4444',color:'white',fontSize:'9px',padding:'1px 5px',borderRadius:'4px',fontWeight:800}},'ETC')),
+          div({style:{fontSize:'12px',color:'#92400e',marginTop:'2px',lineHeight:'1.5'}},e.note),
+        )),
+      ):null,
+      disease.A.otc&&disease.A.otc.length>0?div({style:{background:'#f0fdf4',border:'1px solid #86efac',borderRadius:'8px',padding:'10px 12px',marginBottom:'10px'}},
+        div({style:{fontSize:'12px',fontWeight:800,color:'#166534',marginBottom:'6px'}},'✅ Điều trị căn nguyên — OTC'),
+        ...disease.A.otc.map(e=>div({style:{padding:'5px 0',borderTop:'1px solid #bbf7d0'}},
+          div({style:{display:'flex',alignItems:'center',gap:'6px'}},
+            span({style:{fontSize:'13px',fontWeight:700,color:'#166534'}},e.d),
+            span({style:{background:'#4ade80',color:'#14532d',fontSize:'9px',padding:'1px 5px',borderRadius:'4px',fontWeight:800}},'OTC ✅')
+          ),
+          e.note?div({style:{fontSize:'12px',color:'#166534',marginTop:'2px',lineHeight:'1.5'}},e.note):null,
+        )),
+      ):null,
+      div({style:{padding:'10px 12px',background:'#eff6ff',border:'1px solid #bae6fd',borderRadius:'8px'}},
+        div({style:{fontSize:'13px',color:'var(--t)',lineHeight:'1.7',whiteSpace:'pre-wrap'}},disease.A.note),
+      ),
+    );
+
+    // B section (filtered)
+    const filteredB=getFilteredB(disease);
+    const secB=div({style:{flex:'1 1 260px',minWidth:'240px',padding:'0 8px'}},
+      div({style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'10px',paddingBottom:'6px',borderBottom:`2px solid ${C}`}},
+        div({style:{width:'20px',height:'20px',borderRadius:'5px',background:C,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:900,color:'white'}},'B'),
+        div({style:{fontSize:'14px',fontWeight:800,color:'var(--t)'}},'💊 Điều trị triệu chứng'),
+        S.symptoms.length>0?span({style:{fontSize:'10px',background:C,color:'white',padding:'2px 6px',borderRadius:'10px'}},'Đã lọc'):null,
+      ),
+      gwEl,
+      isChildSafe?null:(filteredB.length===0?div({style:{fontSize:'13px',color:'var(--t3)',fontStyle:'italic',padding:'16px',textAlign:'center'}},'Chọn triệu chứng để xem gợi ý')
+        :div({},...filteredB.map((grpB,gi)=>div({style:{marginBottom:'14px'}},
+          div({style:{display:'flex',gap:'6px',alignItems:'center',marginBottom:'8px'}},
+            div({style:{width:'18px',height:'18px',borderRadius:'4px',background:C,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:900,color:'white',flexShrink:0}},String(gi+1)),
+            div({style:{fontSize:'13px',fontWeight:800,color:'var(--t)'}},grpB.sym),
+          ),
+          div({},...grpB.drugs.map(d=>drugCard(d,C)).filter(Boolean)),
+        )))),
+    );
+
+    // C section
+    const secC=div({style:{flex:'1 1 220px',minWidth:'200px',paddingLeft:'8px'}},
+      div({style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'10px',paddingBottom:'6px',borderBottom:`2px solid ${C}`}},
+        div({style:{width:'20px',height:'20px',borderRadius:'5px',background:C,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:900,color:'white'}},'C'),
+        div({style:{fontSize:'14px',fontWeight:800,color:'var(--t)'}},'🌿 Hỗ trợ'),
+      ),
+      div({},...(S.group==='suygan'?[{n:'Silymarin',d:'140–420mg × 2–3 lần/ngày sau ăn',note:'🟡 Ưu tiên khi suy gan. Hepatoprotective: ổn định màng tế bào gan, kháng viêm, chống oxy hóa. VD: Nano Silymarin Wellcare.'},...disease.C]:disease.C).map(item=>drugCard(item,C)).filter(Boolean)),
+    );
+
+    col3Inner=div({style:{height:'100%',overflowY:'auto',WebkitOverflowScrolling:'touch',padding:'14px 14px 14px 16px'}},
+      rfEl,
+      div({style:{display:'flex',gap:'0',alignItems:'flex-start',flexWrap:'wrap'}},secA,secB,secC),
+      div({style:{marginTop:'16px'}},
+  btn({style:{width:'100%',padding:'13px',borderRadius:'11px',background:`linear-gradient(135deg,${C},${C}CC)`,color:'white',fontSize:'14px',fontWeight:800,cursor:'pointer',boxShadow:`0 4px 16px ${C}44`,border:'none'},onclick:()=>{S.page='dosing';render();}},
+    '📋 Gợi ý công thức phối hợp + ⚠️ Đánh giá tương tác →'
+  )
+),
+      div({style:{marginTop:'12px',padding:'12px 14px',background:'var(--teal)',color:'white',borderRadius:'10px'}},
+        div({style:{fontSize:'13px',fontWeight:800,marginBottom:'4px'}},'⚕️ CÔNG CỤ THAM KHẢO — KHÔNG THAY THẾ ĐÁNH GIÁ LÂM SÀNG'),
+        div({style:{fontSize:'12px',opacity:.85,lineHeight:'1.6'}},'Dành riêng DS/CBYT. Xác minh OTC/ETC tại dichvucong.dav.gov.vn. Nguồn: '+DATA_META.refs[0]+' | Data v'+DATA_META.version),
+      ),
+    );
+  }
+
+  const col3=div({style:{flex:1,overflowY:'auto',WebkitOverflowScrolling:'touch',background:'rgba(255,255,255,.6)'}},col3Inner);
+
+  // Fix groups display (re-do col2 groups grid properly)
+  const grpGrid = col2.querySelector('div:last-child');
+
+  const hdr=div({style:{background:'var(--teal)',color:'white',padding:'8px 16px',display:'flex',alignItems:'center',gap:'10px',flexShrink:0}},
+    h('img',{src:LOGO_URL,style:{width:'32px',height:'32px',borderRadius:'50%',objectFit:'cover',border:'2px solid rgba(255,255,255,.4)',background:'var(--teal)'}}),
+    div({},div({style:{fontSize:'14px',fontWeight:900}},'OTC Review Tool (BETA)'),div({style:{fontSize:'11px',opacity:.7}},'Ôn tập thực hành chuyên môn cho Dược sĩ/Bác sĩ')),
+    disease?btn({style:{marginLeft:'auto',background:'rgba(255,255,255,.2)',border:'1px solid rgba(255,255,255,.3)',borderRadius:'7px',padding:'5px 12px',color:'white',fontSize:'12px',fontWeight:700,cursor:'pointer'},onclick:()=>{S.page='dosing';render();}},'📋 Các gợi ý công thức + Tương tác'):null,
+    disease?btn({style:{marginLeft:'6px',background:'linear-gradient(135deg,#fbbf24,#f59e0b)',border:'none',borderRadius:'7px',padding:'5px 12px',color:'#1a2e2a',fontSize:'12px',fontWeight:800,cursor:'pointer',boxShadow:'0 2px 8px rgba(251,191,36,.3)'},onclick:()=>{S.quizOpen=true;S.quizData=null;render();otcLogUsage('open_quiz',{disease:S.disease});}},'🎮 Game ôn tập'):null,
+
+  );
+
+  // ── MOBILE LAYOUT (tab navigation) ──────────────────────────────────
+  if(isMob()){
+    col1.style.width='100%';col1.style.flexShrink='1';
+    col2.style.width='100%';col2.style.flexShrink='1';col2.style.borderRight='none';col2.style.background='rgba(255,255,255,.95)';
+    const tabs=[{id:'nav',icon:'🗂',label:'Nhóm bệnh'},{id:'sym',icon:'🩺',label:'Triệu chứng'},{id:'out',icon:'💊',label:'Phương án'}];
+    const tabBar=div({style:{background:'white',borderTop:'1.5px solid var(--cream3)',display:'flex',flexShrink:0,paddingBottom:'env(safe-area-inset-bottom,0px)'}},
+      ...tabs.map(t=>{
+        const act=S.mobileTab===t.id;
+        return btn({style:{flex:1,padding:'8px 4px 7px',display:'flex',flexDirection:'column',alignItems:'center',gap:'2px',background:act?'var(--cream2)':'white',borderTop:act?'2.5px solid var(--teal)':'2.5px solid transparent',cursor:'pointer'},onclick:()=>{S.mobileTab=t.id;render();}},
+          div({style:{fontSize:'19px'}},t.icon),
+          div({style:{fontSize:'10px',fontWeight:act?800:400,color:act?'var(--teal)':'var(--t3)',lineHeight:'1.3'}},t.label),
+        );
+      })
+    );
+    const usrName=window._supaUserName||'';
+    const mobHdr=div({style:{background:'var(--teal)',color:'white',padding:'7px 10px',display:'flex',alignItems:'center',gap:'8px',flexShrink:0}},
+      h('img',{src:LOGO_URL,style:{width:'26px',height:'26px',borderRadius:'50%',objectFit:'cover',border:'1.5px solid rgba(255,255,255,.4)',flexShrink:0}}),
+      div({style:{flex:1,minWidth:0}},
+        div({style:{fontSize:'12px',fontWeight:900,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},disease?disease.icon+' '+disease.name:'OTC Review Tool (BETA)'),
+        div({style:{fontSize:'10px',opacity:.65,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},usrName||'Giải đáp Dược'),
+      ),
+      disease?btn({style:{background:'rgba(255,255,255,.2)',borderRadius:'5px',padding:'3px 7px',color:'white',fontSize:'10px',fontWeight:700,cursor:'pointer',flexShrink:0},onclick:()=>{S.page='dosing';render();}},'📋'):null,
+      disease?btn({style:{background:'linear-gradient(135deg,#fbbf24,#f59e0b)',borderRadius:'5px',padding:'3px 7px',color:'#1a2e2a',fontSize:'10px',fontWeight:800,cursor:'pointer',flexShrink:0},onclick:()=>{S.quizOpen=true;S.quizData=null;render();}},'🎮'):null,
+      btn({style:{background:'rgba(255,255,255,.1)',borderRadius:'5px',padding:'3px 7px',color:'rgba(255,255,255,.8)',fontSize:'11px',cursor:'pointer',flexShrink:0},onclick:()=>{S.showDisclaimer=true;render();}},'⚖️'),
+      btn({style:{background:'rgba(255,255,255,.15)',borderRadius:'5px',padding:'3px 7px',color:'rgba(255,255,255,.9)',fontSize:'10px',cursor:'pointer',flexShrink:0},onclick:()=>{if(window._supa)window._supa.auth.signOut().then(()=>window.location.href='index.html');}},'↩'),
+    );
+    const mobC=S.mobileTab==='nav'?col1:S.mobileTab==='sym'?col2:col3;
+    return div({style:{height:'100%',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--cream)',position:'relative'}},
+      h('img',{src:LOGO_URL,style:{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:'250px',height:'250px',borderRadius:'50%',objectFit:'cover',mixBlendMode:'screen',opacity:'.07',pointerEvents:'none',zIndex:0,userSelect:'none'}}),
+      div({style:{position:'relative',zIndex:1,display:'flex',flexDirection:'column',height:'100%'}},
+        mobHdr,
+        div({style:{flex:1,minHeight:0}},div({style:{height:'100%',overflowY:'auto',WebkitOverflowScrolling:'touch',touchAction:'pan-y'}},mobC)),
+        tabBar,
+      ),
+    );
+  }
+  // ── DESKTOP LAYOUT ────────────────────────────────────────────────────
+  return div({style:{height:'100%',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--cream)',position:'relative'}},
+    h('img',{src:LOGO_URL,style:{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:'400px',height:'400px',borderRadius:'50%',objectFit:'cover',mixBlendMode:'screen',opacity:'.1',pointerEvents:'none',zIndex:0,userSelect:'none'}}),
+    div({style:{position:'relative',zIndex:1,display:'flex',flexDirection:'column',height:'100%'}},
+      hdr,
+      div({style:{flex:1,display:'flex',overflow:'hidden'}},col1,col2,col3),
+    ),
+  );
+}
+
+// ── QUIZ GAME ENGINE ─────────────────────────────────────────────────
+function generateQuiz(disease) {
+  if (!disease) return [];
+  const pool = [];
+  const used = new Set();
+  function addQ(q){const k=q.q;if(!used.has(k)){used.add(k);pool.push(q);}}
+  function shuf(a){const s=[...a];for(let i=s.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[s[i],s[j]]=[s[j],s[i]];}return s;}
+  function rand(a){return a[Math.floor(Math.random()*a.length)];}
+
+  const drugsB=[];
+  (disease.B||[]).forEach(g=>(g.drugs||[]).forEach(d=>{if(!d.n.startsWith('⚠️'))drugsB.push({...d,sym:g.sym});}));
+  const drugsC=(disease.C||[]).filter(d=>d.n&&!d.n.startsWith('⚠️'));
+  const allDrugs=[...drugsB,...drugsC];
+  const sp=disease.special||{};
+  const pharmNames=[...new Set(allDrugs.filter(d=>PHARM[d.n]).map(d=>d.n))];
+  const allPharmKeys=Object.keys(PHARM);
+
+  // ══════════════════════════════════════════════════════════════════
+  //  DRUG QUESTIONS  (cat:'drug')  — mục tiêu ≥25 câu
+  // ══════════════════════════════════════════════════════════════════
+
+  // ── D1: Chống chỉ định — "Thuốc nào có CCĐ này?" (MCQ) ────────
+  pharmNames.forEach(dn=>{
+    const ph=PHARM[dn];if(!ph||!ph.ci||ph.ci.length<=5) return;
+    if(ph.ci.includes('Không có')||ph.ci.includes('không có')) return;
+    const others=shuf(pharmNames.filter(d2=>d2!==dn)).slice(0,2);
+    if(others.length<2) return;
+    const ciShort=ph.ci.length>55?ph.ci.substring(0,52)+'…':ph.ci;
+    const opts=shuf([dn,...others]);
+    addQ({cat:'drug',type:'pick',q:'Trong điều trị '+disease.name+', hoạt chất nào có CCĐ: "'+ciShort+'"?',opts:opts,ans:opts.indexOf(dn),exp:'CCĐ của '+dn+': '+ph.ci,icon:'⛔'});
+  });
+
+  // ── D2: Nhóm dược lý — "X thuộc nhóm nào?" (MCQ) ──────────────
+  pharmNames.forEach(dn=>{
+    const ph=PHARM[dn];if(!ph||!ph.cls) return;
+    const cls40=ph.cls.substring(0,45);
+    const otherCls=[...new Set(pharmNames.filter(d2=>d2!==dn&&PHARM[d2]&&PHARM[d2].cls!==ph.cls).map(d2=>PHARM[d2].cls.substring(0,45)))];
+    if(otherCls.length<2) return;
+    const opts=shuf([cls40,...shuf(otherCls).slice(0,2)]);
+    addQ({cat:'drug',type:'pick',q:dn+' thuộc nhóm dược lý nào?',opts:opts,ans:opts.indexOf(cls40),exp:dn+': '+ph.cls,icon:'🧬'});
+  });
+
+  // ── D3: Cảnh báo quan trọng — "Cảnh báo nào đúng với X?" (MCQ)
+  pharmNames.forEach(dn=>{
+    const ph=PHARM[dn];if(!ph||!ph.warn||ph.warn.length<10) return;
+    const warnShort=ph.warn.substring(0,55);
+    const otherWarns=pharmNames.filter(d2=>d2!==dn&&PHARM[d2]&&PHARM[d2].warn&&PHARM[d2].warn!==ph.warn).map(d2=>PHARM[d2].warn.substring(0,55));
+    const uniqueOW=[...new Set(otherWarns)];
+    if(uniqueOW.length<2) return;
+    const opts=shuf([warnShort,...shuf(uniqueOW).slice(0,2)]);
+    addQ({cat:'drug',type:'pick',q:'Cảnh báo nào đúng với '+dn+'?',opts:opts,ans:opts.indexOf(warnShort),exp:'⚠️ '+dn+': '+ph.warn,icon:'⚠️'});
+  });
+
+  // ── D4: First-line theo guideline (MCQ) ─────────────────────────
+  (disease.B||[]).forEach(g=>{
+    const otcD=g.drugs.filter(d=>!d.n.startsWith('⚠️')&&d.note);
+    const fl=otcD.find(d=>d.note&&d.note.includes('Lựa chọn 1'));
+    if(!fl||otcD.length<3) return;
+    const others=otcD.filter(d=>d.n!==fl.n).slice(0,2);
+    if(others.length<2) return;
+    const sym=g.sym.replace(/[⟶⭐🔴🟡🟢]/g,'').replace(/—.*$/,'').trim().substring(0,50);
+    const opts=shuf([fl.n,...others.map(d=>d.n)]);
+    addQ({cat:'drug',type:'pick',q:'Lựa chọn ưu tiên (first-line) cho "'+sym+'" trong '+disease.name+'?',opts:opts,ans:opts.indexOf(fl.n),exp:fl.note.substring(0,150),icon:'🏆'});
+  });
+
+  // ── D5: Quá liều tình huống (T/F) ──────────────────────────────
+  const overdoseScenarios=[
+    {drug:'Paracetamol',q:'BN tự dùng Paracetamol 1000 mg × 5 lần/ngày (5g) cho '+disease.name+'. Liều này an toàn.',ans:false,exp:'Tối đa 4g/ngày NL. 5g → nguy cơ độc gan (NAPQI).'},
+    {drug:'Paracetamol',q:'BN uống cùng lúc 2 loại thuốc cảm (cả 2 đều chứa Paracetamol) → tổng 6g/ngày. DS cần cảnh báo.',ans:true,exp:'Trùng Paracetamol trong combo là nguyên nhân quá liều phổ biến nhất. Luôn kiểm tra thành phần.'},
+    {drug:'Ibuprofen',q:'BN tự mua Ibuprofen 600 mg × 3 lần/ngày (1800 mg) cho '+disease.name+'. Liều này phù hợp OTC.',ans:false,exp:'OTC tối đa 1200 mg/ngày. 1800 mg là liều kê đơn.'},
+    {drug:'Dextromethorphan',q:'BN dùng Dextromethorphan 30 mg × 6 lần (180 mg/ngày). Liều này an toàn.',ans:false,exp:'Tối đa 120 mg/ngày. 180 mg → nguy cơ ảo giác, hội chứng serotonin.'},
+    {drug:'Cetirizine',q:'BN uống Cetirizine 10 mg × 2 lần/ngày vì "1 lần không đỡ". DS nên giữ nguyên liều 10 mg/ngày.',ans:true,exp:'Cetirizine tối đa 10 mg/ngày (NL). Tăng liều không tăng hiệu quả nhưng tăng buồn ngủ.'},
+  ];
+  overdoseScenarios.forEach(s=>{
+    if(drugsB.some(d=>d.n===s.drug)||drugsC.some(d=>d.n===s.drug)){
+      addQ({cat:'drug',type:'tf',q:s.q,ans:s.ans,exp:s.exp,icon:'💊'});
+    }
+  });
+
+  // ── D6: OTC vs ETC (MCQ) ───────────────────────────────────────
+  if(disease.A&&disease.A.etc){
+    disease.A.etc.forEach(etcD=>{
+      if(!etcD.d) return;
+      const etcName=etcD.d.split('/')[0].split('(')[0].trim().substring(0,30);
+      if(etcName.length<3) return;
+      const otcSafe=drugsB.filter(d=>!d.n.startsWith('⚠️')).slice(0,2);
+      if(otcSafe.length<2) return;
+      const opts=shuf([otcSafe[0].n,otcSafe[1].n,etcName]);
+      const idx=opts.indexOf(etcName);
+      if(idx>=0) addQ({cat:'drug',type:'pick',q:'Hoạt chất nào CẦN KÊ ĐƠN (ETC) khi điều trị '+disease.name+'?',opts:opts,ans:idx,exp:'ETC: '+etcD.note.substring(0,120),icon:'📋'});
+    });
+  }
+
+  // ── D7: Tương tác thuốc — tình huống (T/F) ─────────────────────
+  const interKeys=Object.keys(INTERS);
+  drugsB.forEach(d=>{
+    const dn=d.n.toLowerCase();
+    interKeys.forEach(k=>{
+      const parts=k.split('|');
+      if(!parts[0]||!dn.includes(parts[0])) return;
+      const inter=INTERS[k];
+      if(inter.sev==='NGHIÊM TRỌNG'){
+        const d2=parts[1].charAt(0).toUpperCase()+parts[1].slice(1);
+        addQ({cat:'drug',type:'tf',q:'BN đang dùng '+d2+'. DS tư vấn thêm '+d.n+' cho '+disease.name+' mà không cần lo ngại.',ans:false,exp:'⚠️ NGHIÊM TRỌNG: '+inter.desc.substring(0,120),icon:'⚠️'});
+      }
+      if(inter.sev==='Lưu ý'||inter.sev==='Trung bình'){
+        addQ({cat:'drug',type:'tf',q:'Khi phối hợp '+parts[0]+' và '+parts[1]+' cho BN '+disease.name+', không cần điều chỉnh gì.',ans:false,exp:'Lưu ý: '+inter.desc.substring(0,120),icon:'⚠️'});
+      }
+    });
+  });
+
+  // ── D8: Thai phụ — CCĐ thuốc cụ thể (MCQ) ─────────────────────
+  if(sp.preg&&sp.preg.includes('❌')){
+    const pT=sp.preg;
+    const ciMatch=pT.match(/❌\s*([A-Za-zÀ-ỹ\s()0-9.%-]+?)[\s]*[:(,❌✅⚠️.\n]/);
+    const safeMatches=[...pT.matchAll(/✅\s*([A-Za-zÀ-ỹ\s()0-9.%-]+?)[\s]*[,.:❌✅⚠️\n]/g)];
+    if(ciMatch&&safeMatches.length>=2){
+      const ci=ciMatch[1].trim().substring(0,25);
+      const safes=safeMatches.map(m=>m[1].trim().substring(0,25)).filter(s=>s.length>1);
+      if(safes.length>=2&&ci.length>2){
+        const opts=shuf([...safes.slice(0,2),ci]);
+        const idx=opts.indexOf(ci);
+        if(idx>=0) addQ({cat:'drug',type:'pick',q:'Thai phụ bị '+disease.name+' — hoạt chất nào CHỐNG CHỈ ĐỊNH?',opts:opts,ans:idx,exp:'Thai kỳ: '+pT.substring(0,130),icon:'🤰'});
+      }
+    }
+    // Thêm 1 câu T/F
+    if(pT.includes('Paracetamol')){
+      addQ({cat:'drug',type:'tf',q:'Paracetamol là lựa chọn an toàn cho thai phụ bị '+disease.name+'.',ans:true,exp:'Paracetamol an toàn mọi giai đoạn thai kỳ khi dùng đúng liều (≤4g/ngày).',icon:'🤰'});
+    }
+  }
+
+  // ── D9: Suy thận — CCĐ (MCQ) ───────────────────────────────────
+  const kidT=sp.suythan||'';
+  if(kidT.length>10){
+    const ciM=kidT.match(/(Ibuprofen|Naproxen|NSAID|Celecoxib|ibuprofen)/i);
+    if(ciM){
+      const ciN=ciM[1];
+      const safe=drugsB.filter(d=>!d.n.toLowerCase().includes('ibuprofen')&&!d.n.toLowerCase().includes('naproxen')&&!d.n.startsWith('⚠️')).slice(0,2);
+      if(safe.length>=2){
+        const opts=shuf([safe[0].n,safe[1].n,ciN]);
+        const idx=opts.indexOf(ciN);
+        if(idx>=0) addQ({cat:'drug',type:'pick',q:'BN suy thận bị '+disease.name+' — hoạt chất nào CHỐNG CHỈ ĐỊNH?',opts:opts,ans:idx,exp:'Suy thận: '+kidT.substring(0,130),icon:'🫘'});
+      }
+    }
+  }
+
+  // ── D10: Suy gan (T/F) ─────────────────────────────────────────
+  const livT=sp.suygan||'';
+  if(livT.length>10&&livT.includes('Paracetamol')){
+    addQ({cat:'drug',type:'tf',q:'BN suy gan bị '+disease.name+' có thể dùng Paracetamol liều thông thường 4g/ngày.',ans:false,exp:'Suy gan: '+livT.substring(0,130),icon:'🫁'});
+  }
+
+  // ── D11: NCT — Lưu ý (T/F) ─────────────────────────────────────
+  if(sp.eld&&sp.eld.length>10){
+    addQ({cat:'drug',type:'tf',q:'BN 72 tuổi bị '+disease.name+' có thể dùng mọi OTC giống người trưởng thành không cần điều chỉnh.',ans:false,exp:'NCT: '+sp.eld.substring(0,150),icon:'👴'});
+    // Câu T/F thêm nếu nhắc Paracetamol
+    if(sp.eld.toLowerCase().includes('paracetamol')){
+      addQ({cat:'drug',type:'tf',q:'Ở người cao tuổi bị '+disease.name+', Paracetamol thường được ưu tiên hơn NSAIDs.',ans:true,exp:'NCT: NSAIDs tăng nguy cơ GI, thận, tim mạch. Paracetamol ưu tiên nếu đủ hiệu quả.',icon:'👴'});
+    }
+  }
+
+  // ── D12: Thời gian dùng thuốc (MCQ) ────────────────────────────
+  drugsB.forEach(d=>{
+    if(d.n==='Xylometazoline'){
+      const opts=shuf(['3 ngày','5 ngày','7 ngày','14 ngày']);
+      addQ({cat:'drug',type:'pick',q:'Xylometazoline xịt mũi dùng liên tục tối đa bao lâu?',opts:opts,ans:opts.indexOf('7 ngày'),exp:'Tối đa 7 ngày → rebound congestion (rhinitis medicamentosa).',icon:'⏱️'});
+    }
+    if(d.n==='Domperidone'){
+      const opts=shuf(['3 ngày','7 ngày','14 ngày','30 ngày']);
+      addQ({cat:'drug',type:'pick',q:'Domperidone OTC dùng tối đa bao lâu?',opts:opts,ans:opts.indexOf('7 ngày'),exp:'Domperidone: tối đa 7 ngày OTC. Nguy cơ QT prolongation kéo dài.',icon:'⏱️'});
+    }
+    if(d.n==='Bisacodyl'){
+      const opts=shuf(['3 ngày','7 ngày','14 ngày','30 ngày']);
+      addQ({cat:'drug',type:'pick',q:'Bisacodyl (nhuận tràng kích thích) dùng liên tục tối đa?',opts:opts,ans:opts.indexOf('7 ngày'),exp:'Tối đa 7 ngày — phụ thuộc dài hạn + rối loạn điện giải.',icon:'⏱️'});
+    }
+  });
+
+  // ── D13: Cơ chế ứng dụng (MCQ) ─────────────────────────────────
+  if(drugsB.some(d=>d.n==='Ibuprofen')){
+    const opts=shuf(['Ức chế COX ngoại biên → giảm prostaglandin viêm','Gây tê tại chỗ niêm mạc','Kích thích tổng hợp cortisol nội sinh']);
+    addQ({cat:'drug',type:'pick',q:'Tại sao Ibuprofen hiệu quả hơn Paracetamol khi có VIÊM trong '+disease.name+'?',opts:opts,ans:opts.indexOf('Ức chế COX ngoại biên → giảm prostaglandin viêm'),exp:'Ibuprofen ức chế COX-1/2 ngoại biên → giảm PG gây viêm. Paracetamol chủ yếu tác động trung ương.',icon:'🧬'});
+  }
+  if(drugsB.some(d=>d.n==='Diosmectite')){
+    const opts=shuf(['Hấp phụ thuốc khác → giảm hiệu quả','Tương tác CYP450 ở gan','Thay đổi pH dạ dày']);
+    addQ({cat:'drug',type:'pick',q:'Tại sao Diosmectite phải uống CÁCH thuốc khác ≥2h?',opts:opts,ans:opts.indexOf('Hấp phụ thuốc khác → giảm hiệu quả'),exp:'Diosmectite là chất hấp phụ → gắn lên bề mặt thuốc khác trong lòng ruột.',icon:'🧬'});
+  }
+  if(drugsB.some(d=>d.n==='Melatonin')){
+    const opts=shuf(['Điều chỉnh đồng hồ sinh học (circadian)','Gây ức chế CNS trực tiếp','Kháng cholinergic gây buồn ngủ']);
+    addQ({cat:'drug',type:'pick',q:'Melatonin giúp ngủ bằng cơ chế nào?',opts:opts,ans:opts.indexOf('Điều chỉnh đồng hồ sinh học (circadian)'),exp:'Melatonin tác động MT1/MT2 receptor → reset circadian rhythm. KHÔNG gây sedation trực tiếp.',icon:'🧬'});
+  }
+  if(drugsB.some(d=>d.n.includes('Alginate'))){
+    const opts=shuf(['Tạo gel nổi trên dịch vị → rào cản cơ học','Ức chế bơm proton H+/K+-ATPase','Trung hoà acid bằng phản ứng hoá học']);
+    addQ({cat:'drug',type:'pick',q:'Alginate + Antacid điều trị GERD bằng cơ chế nào?',opts:opts,ans:opts.indexOf('Tạo gel nổi trên dịch vị → rào cản cơ học'),exp:'Alginate tạo lớp gel nổi → rào cản vật lý chống trào ngược + antacid trung hoà acid.',icon:'🧬'});
+  }
+
+  // ── D14: So sánh thuốc trong cùng nhóm (T/F) ──────────────────
+  pharmNames.forEach(dn=>{
+    const ph=PHARM[dn];if(!ph) return;
+    if(dn==='Fexofenadine'&&ph.warn.includes('tương tác')){
+      addQ({cat:'drug',type:'tf',q:'Fexofenadine ít tương tác thuốc nhất trong nhóm kháng histamine H1 vì KHÔNG chuyển hoá qua CYP.',ans:true,exp:ph.warn.substring(0,120),icon:'💊'});
+    }
+    if(dn==='Cetirizine'&&ph.warn.includes('buồn ngủ')){
+      addQ({cat:'drug',type:'tf',q:'Cetirizine hoàn toàn không gây buồn ngủ nên có thể lái xe thoải mái.',ans:false,exp:'Cetirizine có thể gây buồn ngủ nhẹ ~10% BN. Thận trọng lái xe.',icon:'💊'});
+    }
+    if(dn==='Cimetidine'){
+      addQ({cat:'drug',type:'tf',q:'Cimetidine an toàn phối hợp với mọi thuốc khác vì là H2 blocker.',ans:false,exp:'Cimetidine ức chế CYP1A2, 2C9, 2D6, 3A4 → RẤT NHIỀU tương tác (warfarin, phenytoin, theophylline...).',icon:'💊'});
+    }
+  });
+
+  // ── D15: Liều trẻ em (T/F) ─────────────────────────────────────
+  if(sp.cu6){
+    const cu6T=sp.cu6;
+    if(cu6T.includes('Aspirin')){
+      addQ({cat:'drug',type:'tf',q:'Aspirin có thể dùng cho trẻ <16 tuổi bị '+disease.name+' nếu giảm liều phù hợp.',ans:false,exp:'Aspirin CHỐNG CHỈ ĐỊNH TUYỆT ĐỐI trẻ <16t → nguy cơ hội chứng Reye (tổn thương gan-não).',icon:'👶'});
+    }
+    if(cu6T.includes('Dextromethorphan')||cu6T.includes('DM')){
+      addQ({cat:'drug',type:'tf',q:'Dextromethorphan OTC an toàn cho trẻ <6 tuổi bị ho.',ans:false,exp:'FDA 2008: KHÔNG dùng OTC ho cho trẻ <6t (nguy cơ quá liều, co giật). Mật ong (≥1t) là thay thế.',icon:'👶'});
+    }
+  }
+
+  // ── D16: THA — Lưu ý thuốc (T/F) ──────────────────────────────
+  if(sp.htn&&sp.htn.length>10){
+    const htnT=sp.htn;
+    if(htnT.includes('phenylephrine')||htnT.includes('Phenylephrine')){
+      addQ({cat:'drug',type:'tf',q:'BN THA không kiểm soát bị '+disease.name+' có thể dùng thuốc phối hợp chứa Phenylephrine.',ans:false,exp:'THA: '+htnT.substring(0,130),icon:'❤️'});
+    }
+    if(htnT.includes('NSAID')||htnT.includes('ibuprofen')||htnT.includes('Ibuprofen')){
+      addQ({cat:'drug',type:'tf',q:'BN THA bị '+disease.name+' nên ưu tiên Ibuprofen vì hiệu quả kháng viêm.',ans:false,exp:'THA: NSAIDs giữ muối, tăng HA. Paracetamol ưu tiên. '+htnT.substring(0,80),icon:'❤️'});
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  //  CLINICAL QUESTIONS  (cat:'clin')  — mục tiêu ≥15 câu
+  // ══════════════════════════════════════════════════════════════════
+
+  // ── C1: Red Flag cấp cứu (MCQ) ─────────────────────────────────
+  const critFlags=(disease.redFlags||[]).filter(rf=>rf.u==='crit');
+  const symptoms=disease.symptoms||[];
+  critFlags.forEach(rf=>{
+    if(symptoms.length<2) return;
+    const distract=shuf(symptoms.filter(s=>s!==rf.f)).slice(0,2);
+    if(distract.length<2) return;
+    const opts=shuf([...distract,rf.f]);
+    addQ({cat:'clin',type:'pick',q:'BN '+disease.name+' — dấu hiệu nào cần GỌI 115 ngay?',opts:opts,ans:opts.indexOf(rf.f),exp:'🚨 '+rf.f+' → '+rf.a,icon:'🚨'});
+  });
+
+  // ── C2: Red Flag chuyển viện (MCQ) ──────────────────────────────
+  const highFlags=(disease.redFlags||[]).filter(rf=>rf.u==='high'||rf.u==='med');
+  highFlags.forEach(rf=>{
+    if(symptoms.length<2) return;
+    const distract=shuf(symptoms.filter(s=>s!==rf.f)).slice(0,2);
+    if(distract.length<2) return;
+    const opts=shuf([...distract,rf.f]);
+    addQ({cat:'clin',type:'pick',q:'BN '+disease.name+' — dấu hiệu nào cần chuyển viện / khám BS?',opts:opts,ans:opts.indexOf(rf.f),exp:'⚠️ '+rf.f+' → '+rf.a,icon:'🏥'});
+  });
+
+  // ── C3: Kháng sinh misconception (T/F) ──────────────────────────
+  if(disease.A&&disease.A.note){
+    const aNote=disease.A.note;
+    if(aNote.includes('virus')||aNote.includes('VIRUS')){
+      addQ({cat:'clin',type:'tf',q:'Khách yêu cầu mua kháng sinh cho '+disease.name+'. DS nên bán vì "uống kháng sinh khỏi nhanh hơn".',ans:false,exp:'Đa số '+disease.name+' do virus → kháng sinh KHÔNG tác dụng. DS từ chối và tư vấn đúng.',icon:'💉'});
+      addQ({cat:'clin',type:'tf',q:disease.name+' do virus thường TỰ KHỎI — vai trò DS là giảm triệu chứng và nhận diện Red Flag.',ans:true,exp:aNote.substring(0,120),icon:'🎯'});
+    }
+    if(aNote.includes('Kháng sinh KHÔNG')){
+      addQ({cat:'clin',type:'tf',q:'Kháng sinh cần thiết cho hầu hết trường hợp '+disease.name+'.',ans:false,exp:'Kháng sinh KHÔNG cần thiết cho đa số ca '+disease.name+' (do virus).',icon:'💉'});
+    }
+  }
+
+  // ── C4: DS xử trí Red Flag (T/F) ───────────────────────────────
+  critFlags.forEach(rf=>{
+    addQ({cat:'clin',type:'tf',q:'BN '+disease.name+' có "'+rf.f+'". DS nên tiếp tục tư vấn OTC và theo dõi.',ans:false,exp:'Red Flag NGHIÊM TRỌNG → '+rf.a+'. DS chuyển tuyến NGAY, không xử trí OTC.',icon:'🚨'});
+  });
+
+  // ── C5: Non-pharm advice (T/F) ─────────────────────────────────
+  if(disease.id==='cold'||disease.id==='cough'||disease.id==='throat'){
+    addQ({cat:'clin',type:'tf',q:'Mật ong là lựa chọn an toàn cho trẻ ≥1 tuổi bị ho — hiệu quả tương đương OTC (Cochrane).',ans:true,exp:'NICE và Cochrane khuyến nghị mật ong cho ho ở trẻ ≥1t. KHÔNG dùng <1t (nguy cơ botulism).',icon:'🍯'});
+    addQ({cat:'clin',type:'tf',q:'Mật ong có thể dùng cho trẻ dưới 1 tuổi bị ho vì là sản phẩm tự nhiên.',ans:false,exp:'Mật ong CHỐNG CHỈ ĐỊNH <1 tuổi → nguy cơ botulism (Clostridium botulinum).',icon:'🍯'});
+  }
+  if(disease.id==='gerd'){
+    addQ({cat:'clin',type:'tf',q:'BN GERD nên ăn xong rồi nằm ngay để dạ dày nghỉ ngơi.',ans:false,exp:'GERD: KHÔNG nằm trong 3h sau ăn. Nằm đầu cao 15–20cm. Acid tiếp xúc thực quản lâu hơn khi nằm.',icon:'🛌'});
+  }
+  if(disease.id==='constipation'){
+    addQ({cat:'clin',type:'tf',q:'BN táo bón nên nằm nghỉ nhiều và hạn chế vận động.',ans:false,exp:'Vận động thể chất kích thích nhu động ruột. Nằm nhiều → táo bón nặng hơn.',icon:'🏃'});
+  }
+  if(disease.id==='diarrhea'){
+    addQ({cat:'clin',type:'tf',q:'Bù nước (ORS) là bước ưu tiên số 1 trong xử trí tiêu chảy cấp, quan trọng hơn thuốc cầm.',ans:true,exp:'ORS bù nước-điện giải = ưu tiên tuyệt đối. Mất nước là nguyên nhân gây tử vong, không phải tiêu chảy.',icon:'💧'});
+  }
+  if(disease.id==='insomnia'){
+    addQ({cat:'clin',type:'tf',q:'CBT-I (Liệu pháp hành vi nhận thức) là first-line cho MỌI loại mất ngủ, trước cả thuốc.',ans:true,exp:'AASM Guidelines: CBT-I first-line. OTC chỉ hỗ trợ ngắn hạn (<3 tuần).',icon:'🧠'});
+  }
+
+  // ── C6: Trẻ <3 tháng (T/F) ─────────────────────────────────────
+  if(sp.u3m){
+    addQ({cat:'clin',type:'tf',q:'Trẻ <3 tháng bị '+disease.name+' có thể dùng OTC liều thấp nếu thận trọng.',ans:false,exp:'Trẻ <3 tháng: KHÔNG OTC. Chuyển BS Nhi ngay.',icon:'🚨'});
+  }
+
+  // ── C7: Phân biệt triệu chứng (MCQ) ───────────────────────────
+  if(symptoms.length>=4){
+    const s1=rand(symptoms);
+    addQ({cat:'clin',type:'tf',q:'"'+s1+'" là triệu chứng thường gặp của '+disease.name+'.',ans:true,exp:'Triệu chứng '+disease.name+': '+symptoms.slice(0,4).join(', '),icon:'📖'});
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  //  SELECTION: 5 câu, ≥3 câu thuốc
+  //  Ưu tiên câu hỏi từ QUIZ_BANK_MAP (pre-authored) nếu có
+  // ══════════════════════════════════════════════════════════════════
+  // Merge pre-authored bank questions nếu disease có trong QUIZ_BANK_MAP
+  const bankQs = QUIZ_BANK_MAP[disease.id] || [];
+  if(bankQs.length > 0){
+    // Thêm tất cả bank questions vào pool (dedup theo q text)
+    bankQs.forEach(q=>{if(!used.has(q.q)){used.add(q.q);pool.push(q);}});
+  }
+
+  const drugPool=shuf(pool.filter(q=>q.cat==='drug'));
+  const clinPool=shuf(pool.filter(q=>q.cat==='clin'));
+  const hasBankCats=pool.some(q=>q.cat==='mechanism'||q.cat==='counseling'||q.cat==='safety');
+
+  let selected=[];
+  if(hasBankCats){
+    const allBankQ=shuf(pool.filter(q=>['drug','mechanism','counseling','safety','clin'].includes(q.cat)));
+    selected=allBankQ.slice(0,5);
+  } else if(drugPool.length>=3&&clinPool.length>=2){
+    selected=[...drugPool.slice(0,3),...clinPool.slice(0,2)];
+  } else if(drugPool.length>=5){
+    selected=drugPool.slice(0,5);
+  } else if(drugPool.length+clinPool.length>=5){
+    selected=[...drugPool,...clinPool].slice(0,5);
+  } else {
+    selected=pool.slice(0,Math.min(5,pool.length));
+  }
+  return shuf(selected);
+}
+
+function renderQuizModal() {
+  if(!S.quizOpen) return null;
+  const disease=getDisease();
+  if(!disease) return null;
+  const C=disease.color;
+  // Init quiz if needed
+  if(!S.quizData||S.quizData.length===0){
+    S.quizData=generateQuiz(disease);
+    S.quizIdx=0;S.quizAnswers=[];S.quizDone=false;S.quizReview=false;
+    if(S.quizData.length===0){S.quizOpen=false;return null;}
+  }
+  const total=S.quizData.length;
+  const closeQuiz=()=>{document.querySelectorAll('[data-quiz-modal]').forEach(e=>e.remove());S.quizOpen=false;S.quizData=null;S.quizIdx=0;S.quizAnswers=[];S.quizDone=false;S.quizReview=false;render();};
+  // Styles
+  const modalW={position:'fixed',inset:0,background:'rgba(0,0,0,.6)',zIndex:10001,display:'flex',alignItems:'center',justifyContent:'center',padding:'12px',animation:'donFadeIn .3s'};
+  const modalB={background:'white',borderRadius:'20px',maxWidth:'560px',width:'100%',maxHeight:'92vh',overflowY:'auto',WebkitOverflowScrolling:'touch',boxShadow:'0 16px 60px rgba(0,0,0,.3)',animation:'donSlide .4s ease-out'};
+  const hdrS={background:`linear-gradient(135deg,${C},${C}CC)`,padding:'18px 20px',borderRadius:'20px 20px 0 0',display:'flex',alignItems:'center',justifyContent:'space-between'};
+  // Progress bar
+  const prog=S.quizDone?total:S.quizIdx;
+  const progressBar=div({style:{height:'6px',background:'rgba(255,255,255,.2)',borderRadius:'3px',margin:'10px 0 0',overflow:'hidden'}},
+    div({style:{height:'100%',width:(prog/total*100)+'%',background:'#4ade80',borderRadius:'3px',transition:'width .4s'}}));
+  // DONE screen
+  if(S.quizDone&&!S.quizReview){
+    const score=S.quizAnswers.filter(a=>a.correct).length;
+    const pct=Math.round(score/total*100);
+    const emoji=pct>=80?'🎉':pct>=60?'👍':pct>=40?'💪':'📚';
+    const msg=pct>=80?'Xuất sắc!':pct>=60?'Khá tốt!':pct>=40?'Cần ôn thêm':'Hãy review lại nhé!';
+    return div({cls:'quiz-modal-overlay','data-quiz-modal':'1',style:modalW,onclick:e=>{if(e.target===e.currentTarget)closeQuiz();}},
+      div({style:modalB},
+        div({style:hdrS},
+          div({style:{color:'white'}},
+            div({style:{fontSize:'16px',fontWeight:800}},'🎮 Kết quả — '+disease.icon+' '+disease.name),
+          ),
+          btn({style:{background:'rgba(255,255,255,.2)',borderRadius:'8px',padding:'6px 14px',color:'white',fontSize:'14px',fontWeight:700,cursor:'pointer'},onclick:closeQuiz},'✕'),
+        ),
+        div({style:{padding:'30px 24px',textAlign:'center'}},
+          div({style:{fontSize:'64px',marginBottom:'8px'}},emoji),
+          div({style:{fontSize:'40px',fontWeight:900,color:C,marginBottom:'4px'}},score+'/'+total),
+          div({style:{fontSize:'18px',fontWeight:700,color:'var(--t)',marginBottom:'4px'}},msg),
+          div({style:{fontSize:'14px',color:'var(--t3)',marginBottom:'24px'}},'Chính xác '+pct+'% câu hỏi'),
+          div({style:{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap'}},
+            btn({style:{padding:'12px 24px',borderRadius:'12px',background:C,color:'white',fontSize:'15px',fontWeight:800,cursor:'pointer',border:'none'},onclick:()=>{S.quizReview=true;render();}},'📖 Xem giải thích'),
+            btn({style:{padding:'12px 24px',borderRadius:'12px',background:'var(--cream2)',color:'var(--t)',fontSize:'15px',fontWeight:700,cursor:'pointer',border:'none'},onclick:()=>{S.quizData=generateQuiz(disease);S.quizIdx=0;S.quizAnswers=[];S.quizDone=false;S.quizReview=false;render();}},'🔄 Chơi lại'),
+            btn({style:{padding:'12px 24px',borderRadius:'12px',background:'#f1f5f9',color:'var(--t2)',fontSize:'14px',fontWeight:600,cursor:'pointer',border:'none'},onclick:closeQuiz},'Đóng'),
+          ),
+        ),
+      ),
+    );
+  }
+  // REVIEW screen
+  if(S.quizReview){
+    return div({cls:'quiz-modal-overlay','data-quiz-modal':'1',style:modalW,onclick:e=>{if(e.target===e.currentTarget)closeQuiz();}},
+      div({style:modalB},
+        div({style:hdrS},
+          div({style:{color:'white'}},div({style:{fontSize:'16px',fontWeight:800}},'📖 Giải thích — '+disease.icon+' '+disease.name)),
+          btn({style:{background:'rgba(255,255,255,.2)',borderRadius:'8px',padding:'6px 14px',color:'white',fontSize:'14px',fontWeight:700,cursor:'pointer'},onclick:closeQuiz},'✕'),
+        ),
+        div({style:{padding:'16px 20px'}},
+          ...S.quizData.map((q,i)=>{
+            const ua=S.quizAnswers[i];
+            const isCorrect=ua&&ua.correct;
+            const bg=isCorrect?'#f0fdf4':'#fff1f2';
+            const bc=isCorrect?'#86efac':'#fca5a5';
+            return div({style:{background:bg,border:'1px solid '+bc,borderRadius:'12px',padding:'14px 16px',marginBottom:'10px'}},
+              div({style:{display:'flex',gap:'8px',alignItems:'flex-start',marginBottom:'6px'}},
+                span({style:{fontSize:'20px',flexShrink:0}},isCorrect?'✅':'❌'),
+                div({},
+                  div({style:{fontSize:'13px',fontWeight:700,color:'var(--t)',marginBottom:'4px'}},'Câu '+(i+1)+': '+q.q),
+                  q.type==='tf'
+                    ?div({style:{fontSize:'12px',color:'var(--t2)'}},'Đáp án đúng: '+(q.ans?'ĐÚNG ✅':'SAI ❌')+(ua?' · Bạn chọn: '+(ua.picked?'ĐÚNG':'SAI'):''))
+                    :div({style:{fontSize:'12px',color:'var(--t2)'}},'Đáp án đúng: '+q.opts[q.ans]+(ua?' · Bạn chọn: '+q.opts[ua.picked]:'')),
+                  div({style:{fontSize:'12px',color:C,marginTop:'4px',lineHeight:'1.5',fontStyle:'italic'}},'💡 '+q.exp),
+                ),
+              ),
+            );
+          }),
+          div({style:{display:'flex',gap:'10px',justifyContent:'center',marginTop:'14px'}},
+            btn({style:{padding:'10px 20px',borderRadius:'10px',background:C,color:'white',fontSize:'14px',fontWeight:700,cursor:'pointer',border:'none'},onclick:()=>{S.quizReview=false;render();}},'← Quay lại kết quả'),
+            btn({style:{padding:'10px 20px',borderRadius:'10px',background:'#f1f5f9',color:'var(--t2)',fontSize:'14px',fontWeight:600,cursor:'pointer',border:'none'},onclick:closeQuiz},'Đóng'),
+          ),
+        ),
+      ),
+    );
+  }
+  // QUESTION screen
+  const q=S.quizData[S.quizIdx];
+  if(!q){S.quizDone=true;render();return null;}
+  function answer(val){
+    let correct;
+    if(q.type==='tf') correct=(val===q.ans);
+    else correct=(val===q.ans);
+    S.quizAnswers.push({picked:val,correct:correct});
+    // Show feedback briefly then advance
+    setTimeout(()=>{
+      if(S.quizIdx+1>=total){S.quizDone=true;}else{S.quizIdx++;}
+      render();
+    },2000);
+    render();
+  }
+  const justAnswered=S.quizAnswers.length>S.quizIdx;
+  const lastAns=justAnswered?S.quizAnswers[S.quizAnswers.length-1]:null;
+  return div({cls:'quiz-modal-overlay','data-quiz-modal':'1',style:modalW,onclick:e=>{if(e.target===e.currentTarget)closeQuiz();}},
+    div({style:modalB},
+      div({style:hdrS},
+        div({style:{color:'white',flex:1}},
+          div({style:{fontSize:'15px',fontWeight:800}},'🎮 Game ôn tập — '+disease.icon+' '+disease.name),
+          div({style:{fontSize:'12px',opacity:.8}},'Câu '+(S.quizIdx+1)+'/'+total),
+          progressBar,
+        ),
+        btn({style:{background:'rgba(255,255,255,.2)',borderRadius:'8px',padding:'6px 14px',color:'white',fontSize:'14px',fontWeight:700,cursor:'pointer',flexShrink:0,marginLeft:'10px'},onclick:closeQuiz},'✕'),
+      ),
+      div({style:{padding:'24px 20px'}},
+        div({style:{textAlign:'center',fontSize:'36px',marginBottom:'12px'}},q.icon||'💊'),
+        div({style:{fontSize:'17px',fontWeight:700,color:'var(--t)',textAlign:'center',lineHeight:'1.6',marginBottom:'24px'}},q.q),
+        justAnswered
+          ?div({style:{textAlign:'center',fontSize:'48px',marginBottom:'12px'}},lastAns.correct?'✅':'❌')
+          :q.type==='tf'
+            ?div({style:{display:'flex',gap:'12px',justifyContent:'center'}},
+                btn({style:{flex:1,maxWidth:'200px',padding:'18px 16px',borderRadius:'14px',background:'#f0fdf4',border:'2px solid #86efac',fontSize:'18px',fontWeight:800,color:'#166534',cursor:'pointer',transition:'all .15s'},onclick:()=>answer(true)},'✅ ĐÚNG'),
+                btn({style:{flex:1,maxWidth:'200px',padding:'18px 16px',borderRadius:'14px',background:'#fff1f2',border:'2px solid #fca5a5',fontSize:'18px',fontWeight:800,color:'#b91c1c',cursor:'pointer',transition:'all .15s'},onclick:()=>answer(false)},'❌ SAI'),
+              )
+            :div({style:{display:'flex',flexDirection:'column',gap:'12px'}},
+                ...q.opts.map((opt,oi)=>btn({style:{display:'block',width:'100%',boxSizing:'border-box',height:'auto',overflow:'visible',padding:'14px 16px',borderRadius:'14px',background:'white',border:'2px solid var(--cream3)',fontSize:'15px',fontWeight:700,color:'var(--t)',cursor:'pointer',textAlign:'left',transition:'all .15s',whiteSpace:'normal',wordBreak:'break-word',wordWrap:'break-word',lineHeight:'1.6'},onclick:()=>answer(oi)},
+                  span({style:{fontSize:'13px',fontWeight:800,color:C,marginRight:'8px'}},String.fromCharCode(65+oi)+'.'),opt)),
+              ),
+      ),
+      div({style:{padding:'0 20px 16px',textAlign:'center'}},
+        div({style:{fontSize:'11px',color:'var(--t3)'}},'Data v'+DATA_META.version+' · '+disease.name),
+      ),
+    ),
+  );
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────
+function render() {
+  const app=document.getElementById('app');
+  // Save col1 scroll position before wiping DOM
+  var _prevCol1=app.querySelector('[data-col1-scroll]');
+  var _col1Scroll=_prevCol1?_prevCol1.scrollTop:0;
+  app.innerHTML='';
+  if(S.quizOpen){const qm=renderQuizModal();if(qm)document.body.appendChild(qm);}
+  if(S.page==='dosing'){app.appendChild(renderDosing());return;}
+  app.appendChild(renderMain());
+  var _nc1=app.querySelector('[data-col1-scroll]');if(_nc1&&_col1Scroll)_nc1.scrollTop=_col1Scroll;
+}
+
+function init() {
+  render();
+  window.addEventListener('resize',()=>{render();});
+  document.addEventListener('click',e=>{
+    if(S.pharmOpen&&!e.target.closest('.pharm-panel')&&!e.target.hasAttribute('data-drug')){
+      S.pharmOpen=null; 
+     if(S.pharmOpen){const tt=renderPharmTooltip(S.pharmOpen);;if(tt)document.body.appendChild(tt);};
+    }
+  });
+  setTimeout(() => {
+  	document.getElementById('authCheckOverlay').style.display='none';
+  }, 1000);
+}
+
+// ═════════════════════════
+// BOOT
+// ═════════════════════════
+try{var vb=document.getElementById('otcVersionBadge');if(vb)vb.textContent='Data v'+DATA_META.version+' · '+DATA_META.updated;}catch(e){}
+init();
+</script>
+
+</body>
+</html>
