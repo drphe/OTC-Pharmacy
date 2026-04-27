@@ -1,0 +1,17 @@
+{
+  "name": "Giải đáp dược",
+  "short_name": "OTC Drugs",
+  "description": "OTC Review Tool",
+  "lang": "en-US",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+
+  ]
+}
