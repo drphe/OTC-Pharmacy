@@ -1,3 +1,5 @@
+const DATA_META = {"version":"2.1","updated":"07/05/2026","refs":["Blenkinsopp et al. (2025) 10th Ed.","Rutter P. (2026) 6th Ed.","Dược thư QGVN (2018)","Krinsky et al. (2020) 20th Ed."]};
+
 // ── DRUG SAFETY LOOKUP ────────────────────────────────────────────────
 const DRUG_SAFETY = {
   "Paracetamol":{u3m:{show:false,warn:"Chuyển BS Nhi"},u2y:{show:true,dose:"Siro 120mg/5ml: 10–15mg/kg/lần × 3–4 lần"},cu6:{show:true,dose:"10–15mg/kg/lần × 3–4 lần"},c612:{show:true,dose:"250–500mg/lần × 3–4 lần"},preg:{show:true,warn:"An toàn cả 3 quý"},suygan:{show:true,warn:"⚠️ Giảm liều <2g/ngày"},suythan:{show:true,warn:"⚠️ Giãn cách liều mỗi 6–8h"}},
@@ -61,4 +63,3 @@ const DRUG_SAFETY = {
   "Hyoscine butylbromide":{u3m:{show:false,warn:"Chống chỉ định"},u2y:{show:false,warn:"Không khuyến cáo"},cu6:{show:true,dose:"≥6 tuổi: 10 mg × 3 lần/ngày"},c612:{show:true,dose:"10 mg × 3 lần/ngày; tối đa 30 mg/ngày"},preg:{show:true,warn:"Tránh T1; thận trọng — liều thấp nhất, ngắn nhất"},bfeed:{show:true,warn:"Lượng nhỏ qua sữa — thận trọng"},suygan:{show:true,warn:"An toàn liều thường"},suythan:{show:true,warn:"An toàn liều thường"}},
   "Peppermint oil":{u3m:{show:false,warn:"Chống chỉ định"},u2y:{show:false,warn:"Không dùng <2 tuổi"},cu6:{show:false,warn:"Không khuyến cáo <8 tuổi (menthol)"},c612:{show:true,warn:"Thận trọng; dùng dạng enteric-coated; liều theo cân nặng"},preg:{show:true,warn:"Dữ liệu hạn chế — chỉ khi thật sự cần; tránh liều cao"},bfeed:{show:true,warn:"Dữ liệu hạn chế — thận trọng"},suygan:{show:true,warn:"An toàn liều thường"},suythan:{show:true,warn:"An toàn"}}
 };
-

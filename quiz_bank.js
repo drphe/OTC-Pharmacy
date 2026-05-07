@@ -1,3 +1,4 @@
+
 // ── QUIZ BANK (Pre-authored — v1.0, 10/04/2026) ──────────────────────
 const QUIZ_BANK_MAP = {
     "cold": [
