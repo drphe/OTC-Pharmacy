@@ -1,4 +1,8 @@
+// GROUPS is now computed via getGroups() on each render
+
 const DATA_META = {"version":"2.1","updated":"07/05/2026","refs":["Blenkinsopp et al. (2025) 10th Ed.","Rutter P. (2026) 6th Ed.","Dược thư QGVN (2018)","Krinsky et al. (2020) 20th Ed."]};
+
+
 
 // ── DRUG SAFETY LOOKUP ────────────────────────────────────────────────
 const DRUG_SAFETY = {
