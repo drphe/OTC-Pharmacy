@@ -388,7 +388,7 @@ function renderMain() {
   // Col3: Main Content
   let col3Inner;
   if(!disease){
-    col3Inner=div({style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'14px',padding:'40px'}},
+    col3Inner=div({style:{display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'14px',padding:'40px'}},
       h('img',{src:LOGO_URL,style:{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',opacity:.2,background:'var(--teal)'}}),
       div({style:{fontSize:'16px',color:'var(--t3)',textAlign:'center'}},'Chọn nhóm bệnh để xem gợi ý'),
       div({style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(110px,1fr))',gap:'8px',maxWidth:'650px',width:'100%'}},
